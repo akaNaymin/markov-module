@@ -1,6 +1,6 @@
 
 import numpy as np
-
+import pickle
 
 class markov():
 
@@ -44,4 +44,8 @@ class markov():
             sentence = sentence + ' ' + current
         return sentence
 
+    def to_pickle(self, filename):
+        pickle.dump(self.model, open('pickled_markov.p', 'wb'))
 
+    def from_pickle(self, filename):
+        self.model = pickle.load(open('pickled_markov.p', 'rb'))
