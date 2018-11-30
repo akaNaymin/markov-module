@@ -2,13 +2,15 @@
 import numpy as np
 import pickle
 
-class markov():
+class Markov(object):
 
-    def __init__(self, text):
+    def __init__(self, text=None):
         self.model = {}
-        self.create_markov(text)
+        if text:
+            mk = Markov.from_text(text)
+            self.model = mk.model
 
-    def parse_line(self, line):
+    def insert_line(self, line):
         words = line.split() + ['\n']
         word_count = len(words)
         for idx in range(word_count - 1):
@@ -20,11 +22,30 @@ class markov():
             else: # add follower
                 self.model[pair[0]][pair[1]] += 1 
 
-    def create_markov(self, text):
+    @classmethod
+    def from_text(cls, text):
+        mk = Markov()
         for line in text.split('\n'):
             line = line.strip()
             if len(line) > 0:
-                self.parse_line(line)
+                mk.insert_line(line)
+        return mk
+
+    @classmethod
+    def from_file(cls, path):
+        with open(path) as file:
+            text = file.read()  
+        return cls.from_text(text)
+
+    @classmethod
+    def from_pickle(cls, filename):
+        mk = Markov()
+        mk.model = pickle.load(open(filename, 'rb'))
+        return mk
+
+    def to_pickle(self, filename):
+        pickle.dump(self.model, open(filename, 'wb'))
+
 
     def pick_next(self, word):
         word_chains = self.model
@@ -45,8 +66,5 @@ class markov():
             sentence = sentence + ' ' + current
         return sentence
 
-    def to_pickle(self, filename):
-        pickle.dump(self.model, open('pickled_markov.p', 'wb'))
 
-    def from_pickle(self, filename):
-        self.model = pickle.load(open('pickled_markov.p', 'rb'))
+    
